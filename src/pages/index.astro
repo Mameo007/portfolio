@@ -1,6 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
+import ProjectGrid from '../components/ProjectGrid.astro';
+import { getProjects } from '../lib/projects';
+
+const featured = (await getProjects()).filter((p) => p.data.featured).slice(0, 4);
 
 // TODO: replace with your own stack.
 const stack = ['TypeScript', 'React', 'Node.js', 'Python', 'PostgreSQL', 'AWS'];
@@ -9,7 +13,22 @@ const stack = ['TypeScript', 'React', 'Node.js', 'Python', 'PostgreSQL', 'AWS'];
 <BaseLayout>
   <Hero />
 
-  <section id="about" class="container-x grid gap-12 border-t border-line pt-20 md:grid-cols-12 md:pt-28">
+  <section id="work" class="container-x border-t border-line pt-20 md:pt-28">
+    <div class="mb-16 flex items-end justify-between gap-6 md:mb-20">
+      <h2 class="reveal font-display text-5xl tracking-tight md:text-7xl">Selected work</h2>
+      <a
+        href="/work"
+        class="reveal group hidden shrink-0 items-center gap-2 text-sm font-medium text-muted hover:text-ink sm:inline-flex"
+      >
+        All projects
+        <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </a>
+    </div>
+    <ProjectGrid projects={featured} />
+    <a href="/work" class="mt-16 inline-flex items-center gap-2 text-sm font-medium sm:hidden">All projects →</a>
+  </section>
+
+  <section id="about" class="container-x mt-32 grid gap-12 border-t border-line pt-20 md:mt-40 md:grid-cols-12 md:pt-28">
     <h2 class="reveal text-sm font-medium uppercase tracking-[0.2em] text-muted md:col-span-3">About</h2>
 
     <div class="md:col-span-9">

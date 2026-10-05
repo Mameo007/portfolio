@@ -1,0 +1,23 @@
+---
+import ProjectCard from './ProjectCard.astro';
+import { getProjects, projectNumber, type Project } from '../lib/projects';
+
+interface Props {
+  projects: Project[];
+}
+
+const { projects } = Astro.props;
+// Number by position in the full list so a project keeps its number on every page.
+const allIds = (await getProjects()).map((p) => p.id);
+---
+
+<!-- Two staggered columns on desktop: every second card drops down. -->
+<div class="grid gap-x-10 gap-y-20 md:grid-cols-2 lg:gap-x-16">
+  {
+    projects.map((project, i) => (
+      <div class:list={['reveal', i % 2 === 1 && 'md:mt-32']} style={`--reveal-delay:${(i % 2) * 120}ms`}>
+        <ProjectCard project={project} number={projectNumber(allIds.indexOf(project.id))} />
+      </div>
+    ))
+  }
+</div>

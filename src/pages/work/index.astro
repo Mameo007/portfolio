@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectGrid from '../../components/ProjectGrid.astro';
+import { getProjects } from '../../lib/projects';
+
+const projects = await getProjects();
+---
+
+<BaseLayout title="Work" description="Selected projects and case studies.">
+  <section class="container-x pt-36 md:pt-48">
+    <p class="reveal text-sm font-medium uppercase tracking-[0.2em] text-muted">Work · {projects.length} projects</p>
+    <h1 class="reveal mt-6 font-display text-[clamp(3rem,10vw,7.5rem)] leading-[0.95] tracking-[-0.03em]">
+      Things I've <em class="text-accent">built</em>
+    </h1>
+    <p class="reveal mt-8 max-w-xl text-lg leading-relaxed text-muted" style="--reveal-delay:100ms">
+      A selection of projects, each with a write-up on the problem, my approach, and what I learned.
+    </p>
+  </section>
+
+  <section class="container-x mt-20 md:mt-28">
+    <ProjectGrid projects={projects} />
+  </section>
+</BaseLayout>

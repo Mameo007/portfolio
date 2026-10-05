@@ -1,0 +1,120 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getProjects, projectNumber } from '../../lib/projects';
+
+export const getStaticPaths = (async () => {
+  const projects = await getProjects();
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: {
+      project,
+      number: projectNumber(i),
+      next: projects[(i + 1) % projects.length],
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project, number, next } = Astro.props;
+const { title, summary, year, role, stack, links, cover, coverAlt } = project.data;
+const { Content } = await render(project);
+
+const linkItems = [
+  links.live && { label: 'Live site', href: links.live },
+  links.repo && { label: 'Source code', href: links.repo },
+].filter(Boolean) as { label: string; href: string }[];
+---
+
+<BaseLayout title={title} description={summary}>
+  <article>
+    <header class="container-x pt-36 md:pt-48">
+      <a href="/work" class="group inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-ink">
+        <span aria-hidden="true" class="transition-transform duration-300 group-hover:-translate-x-1">←</span>
+        All work
+      </a>
+
+      <p class="mt-12 text-sm font-medium uppercase tracking-[0.2em] text-accent">Case study {number}</p>
+      <h1 class="mt-4 max-w-5xl font-display text-[clamp(2.75rem,8vw,6.5rem)] leading-[0.98] tracking-[-0.03em]">
+        {title}
+      </h1>
+      <p class="mt-8 max-w-2xl text-xl leading-relaxed text-muted">{summary}</p>
+
+      <dl class="mt-14 grid gap-8 border-t border-line pt-8 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <dt class="text-muted">Role</dt>
+          <dd class="mt-2 font-medium">{role}</dd>
+        </div>
+        <div>
+          <dt class="text-muted">Year</dt>
+          <dd class="mt-2 font-medium">{year}</dd>
+        </div>
+        <div>
+          <dt class="text-muted">Stack</dt>
+          <dd class="mt-2 font-medium">{stack.join(', ')}</dd>
+        </div>
+        {
+          linkItems.length > 0 && (
+            <div>
+              <dt class="text-muted">Links</dt>
+              <dd class="mt-2 flex flex-col gap-1 font-medium">
+                {linkItems.map((link) => (
+                  <a href={link.href} target="_blank" rel="noopener noreferrer" class="w-fit hover:text-accent">
+                    {link.label} ↗<span class="sr-only"> (opens in a new tab)</span>
+                  </a>
+                ))}
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+    </header>
+
+    <div class="container-x mt-16">
+      <div transition:name={`cover-${project.id}`} class="aspect-[16/9] overflow-hidden rounded-2xl bg-surface">
+        {
+          cover ? (
+            <Image
+              src={cover}
+              alt={coverAlt ?? ''}
+              widths={[800, 1200, 1800]}
+              sizes="(min-width: 1280px) 1200px, 100vw"
+              loading="eager"
+              class="h-full w-full object-cover"
+            />
+          ) : (
+            <div class="flex h-full items-end justify-between p-8 md:p-12" aria-hidden="true">
+              <span class="font-display text-[clamp(5rem,18vw,14rem)] leading-none tracking-tight text-line">
+                {number}
+              </span>
+              <span class="text-5xl text-accent">✦</span>
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="container-x mt-20 md:mt-28">
+      <div class="prose-case mx-auto max-w-2xl">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  {
+    next && next.id !== project.id && (
+      <nav class="container-x mt-32" aria-label="Next project">
+        <a href={`/work/${next.id}`} class="group block border-t border-line pt-10">
+          <p class="text-sm font-medium uppercase tracking-[0.2em] text-muted">Next project</p>
+          <p class="mt-4 flex items-center justify-between gap-6 font-display text-4xl tracking-tight md:text-6xl">
+            <span class="transition-colors group-hover:text-accent">{next.data.title}</span>
+            <span aria-hidden="true" class="transition-transform duration-500 ease-out-expo group-hover:translate-x-2">
+              →
+            </span>
+          </p>
+        </a>
+      </nav>
+    )
+  }
+</BaseLayout>
