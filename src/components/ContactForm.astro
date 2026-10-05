@@ -1,0 +1,123 @@
+---
+import { site } from '../data/site';
+
+const endpoint = `https://formspree.io/f/${site.formspreeId}`;
+const configured = site.formspreeId !== 'your-form-id';
+
+const field =
+  'peer w-full border-0 border-b border-line bg-transparent px-0 pb-3 pt-2 text-lg text-ink placeholder:text-muted/60 transition-colors focus:border-accent focus:outline-none focus:ring-0 [&.touched:invalid]:border-red-500';
+const label = 'text-sm font-medium text-muted';
+---
+
+<form
+  data-contact-form
+  data-configured={configured ? '' : undefined}
+  action={endpoint}
+  method="POST"
+  novalidate
+  class="flex flex-col gap-10"
+>
+  <div class="grid gap-10 sm:grid-cols-2">
+    <label class="flex flex-col gap-1">
+      <span class={label}>Name</span>
+      <input class={field} type="text" name="name" autocomplete="name" required placeholder="Jane Doe" />
+    </label>
+    <label class="flex flex-col gap-1">
+      <span class={label}>Email</span>
+      <input class={field} type="email" name="email" autocomplete="email" required placeholder="jane@company.com" />
+    </label>
+  </div>
+
+  <label class="flex flex-col gap-1">
+    <span class={label}>Company <span class="font-normal">(optional)</span></span>
+    <input class={field} type="text" name="company" autocomplete="organization" placeholder="Acme Inc." />
+  </label>
+
+  <label class="flex flex-col gap-1">
+    <span class={label}>Message</span>
+    <textarea
+      class={`${field} min-h-36 resize-y`}
+      name="message"
+      required
+      minlength="10"
+      rows="5"
+      placeholder="Tell me about the role or project…"></textarea>
+  </label>
+
+  <!-- Honeypot: hidden from people, catches bots. -->
+  <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <button
+      type="submit"
+      class="group inline-flex w-fit items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-accent-ink disabled:cursor-wait disabled:opacity-60"
+    >
+      <span data-label>Send message</span>
+      <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+    </button>
+    <p data-status role="status" aria-live="polite" class="text-sm"></p>
+  </div>
+</form>
+
+<script>
+  import { site } from '../data/site';
+
+  function initContactForm() {
+    const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = 'true';
+
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    const label = button.querySelector<HTMLElement>('[data-label]')!;
+
+    const setStatus = (text: string, tone: 'ok' | 'error' | 'muted') => {
+      status.textContent = text;
+      status.className = `text-sm ${tone === 'ok' ? 'text-accent' : tone === 'error' ? 'text-red-600 dark:text-red-400' : 'text-muted'}`;
+    };
+
+    // Only show invalid styling after the visitor has interacted with a field.
+    form.querySelectorAll('input, textarea').forEach((el) =>
+      el.addEventListener('blur', () => el.classList.add('touched'), { once: true }),
+    );
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      form.querySelectorAll('input, textarea').forEach((el) => el.classList.add('touched'));
+
+      if (!form.checkValidity()) {
+        setStatus('Please fill in your name, a valid email and a short message.', 'error');
+        form.querySelector<HTMLElement>(':invalid')?.focus();
+        return;
+      }
+
+      if (!form.hasAttribute('data-configured')) {
+        setStatus(`The form isn't connected yet. Please email ${site.email} directly.`, 'error');
+        return;
+      }
+
+      button.disabled = true;
+      label.textContent = 'Sending…';
+      setStatus('', 'muted');
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+        form.reset();
+        form.querySelectorAll('.touched').forEach((el) => el.classList.remove('touched'));
+        setStatus("Thanks! Your message is on its way. I'll get back to you soon.", 'ok');
+      } catch {
+        setStatus(`Something went wrong. Please try again or email ${site.email}.`, 'error');
+      } finally {
+        button.disabled = false;
+        label.textContent = 'Send message';
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', initContactForm);
+</script>
