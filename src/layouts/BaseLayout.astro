@@ -1,0 +1,60 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = site.description } = Astro.props;
+const pageTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.role}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <ClientRouter />
+  </head>
+  <body class="min-h-dvh flex flex-col">
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <script>
+      // Fade-up `.reveal` elements as they scroll into view.
+      // Re-run after every client-side navigation.
+      function initReveal() {
+        const els = document.querySelectorAll<HTMLElement>('.reveal:not(.is-visible)');
+        if (!('IntersectionObserver' in window)) {
+          els.forEach((el) => el.classList.add('is-visible'));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                io.unobserve(entry.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -10% 0px' },
+        );
+        els.forEach((el) => io.observe(el));
+      }
+      document.addEventListener('astro:page-load', initReveal);
+    </script>
+  </body>
+</html>
