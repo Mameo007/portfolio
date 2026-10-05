@@ -15,7 +15,7 @@ export const site = {
 
 export const socials = [
   { label: 'GitHub', href: 'https://github.com/Mameo007' },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/your-handle' }, // TODO
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/kanta-endo' },
 ] as const;
 
 export const navLinks = [
