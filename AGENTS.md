@@ -7,6 +7,7 @@ Read this before making any change. It is the single source of truth for how wor
 - **Never commit to `main`.** Every change, however small, goes on its own branch and lands through a pull request. If you find uncommitted edits on `main`, move them to a new branch (`git switch -c <branch>` carries them over) before committing.
 - **One concern per branch/PR.** Don't bundle unrelated changes.
 - **Don't merge.** Open the PR and stop; the owner reviews and merges it manually.
+- **Delete branches after merging.** Once a PR is merged, switch to `main`, pull, and delete the branch locally (`git branch -d <branch>`) and on GitHub (`git push origin --delete <branch>`). Confirm it's merged first; `-d` refuses to delete unmerged work, so never force it with `-D`.
 - PRs are merged with a merge commit (not squash), so keep the branch history clean: usually a single commit.
 
 ### Branch names
