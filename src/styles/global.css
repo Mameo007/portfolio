@@ -119,3 +119,121 @@
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Case-study prose (rendered MDX)
+ * ------------------------------------------------------------------------- */
+@layer components {
+  .prose-case {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--ink);
+  }
+
+  .prose-case > * + * {
+    margin-top: 1.25em;
+  }
+
+  .prose-case h2 {
+    margin-top: 2.5em;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .prose-case h3 {
+    margin-top: 2em;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .prose-case :is(h2, h3) + * {
+    margin-top: 0.75em;
+  }
+
+  .prose-case p,
+  .prose-case li {
+    color: var(--muted);
+  }
+
+  .prose-case strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .prose-case a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 4px;
+  }
+
+  .prose-case a:hover {
+    color: var(--accent);
+  }
+
+  .prose-case ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .prose-case ul > li {
+    position: relative;
+    padding-left: 1.5em;
+  }
+
+  .prose-case ul > li + li {
+    margin-top: 0.5em;
+  }
+
+  .prose-case ul > li::before {
+    content: "✦";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 0.75em;
+    top: 0.35em;
+  }
+
+  .prose-case ol {
+    list-style: decimal;
+    padding-left: 1.25em;
+  }
+
+  .prose-case blockquote {
+    border-left: 2px solid var(--accent);
+    padding-left: 1.25em;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.4;
+  }
+
+  .prose-case blockquote p {
+    color: var(--ink);
+  }
+
+  .prose-case :not(pre) > code {
+    background: var(--surface);
+    border-radius: 0.3em;
+    padding: 0.15em 0.4em;
+    font-size: 0.875em;
+  }
+
+  .prose-case pre {
+    overflow-x: auto;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .prose-case img {
+    border-radius: 1rem;
+  }
+
+  .prose-case hr {
+    border-color: var(--line);
+    margin-block: 3em;
+  }
+}
