@@ -1,0 +1,184 @@
+---
+import { navLinks, site, socials } from '../data/site';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<header
+  data-nav
+  class="group fixed inset-x-0 top-0 z-50 border-b border-transparent transition-[translate,background-color,border-color] duration-500 ease-out-expo data-[hidden]:-translate-y-full data-[scrolled]:border-line data-[scrolled]:bg-bg/80 data-[scrolled]:backdrop-blur-md"
+>
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-ink"
+  >
+    Skip to content
+  </a>
+
+  <nav class="container-x flex h-16 items-center justify-between md:h-20" aria-label="Main">
+    <a href="/" class="group/logo flex items-center gap-2 font-display text-lg font-semibold tracking-tight md:text-xl">
+      <span>{site.name}</span>
+      <span
+        aria-hidden="true"
+        class="text-accent transition-transform duration-700 ease-out-expo group-hover/logo:rotate-90">✦</span
+      >
+    </a>
+
+    <ul class="hidden items-center gap-10 md:flex">
+      {
+        navLinks.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              aria-current={isActive(link.href) ? 'page' : undefined}
+              class="relative text-sm font-medium text-muted transition-colors hover:text-ink aria-[current=page]:text-ink after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-accent after:transition-transform after:duration-500 after:ease-out-expo hover:after:scale-x-100 aria-[current=page]:after:scale-x-100"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <button
+      type="button"
+      data-menu-toggle
+      class="-mr-2 flex h-11 w-11 items-center justify-center md:hidden"
+      aria-controls="mobile-menu"
+      aria-expanded="false"
+      aria-label="Open menu"
+    >
+      <span class="relative block h-3 w-6" aria-hidden="true">
+        <span
+          class="absolute left-0 top-0 h-0.5 w-full bg-ink transition-transform duration-300 group-data-[menu-open]:translate-y-[5px] group-data-[menu-open]:rotate-45"
+        ></span>
+        <span
+          class="absolute bottom-0 left-0 h-0.5 w-full bg-ink transition-transform duration-300 group-data-[menu-open]:-translate-y-[5px] group-data-[menu-open]:-rotate-45"
+        ></span>
+      </span>
+    </button>
+  </nav>
+
+</header>
+
+<!-- Sibling of the header (not a child) so backdrop-blur on the header
+     doesn't become the containing block for this fixed overlay. -->
+<div
+  id="mobile-menu"
+  data-mobile-menu
+  hidden
+  class="fixed inset-0 z-40 flex flex-col justify-between bg-bg px-4 pb-10 pt-24 md:hidden"
+>
+  <ul class="flex flex-col gap-2">
+    {
+      navLinks.map((link, i) => (
+        <li class="menu-item" style={`--i:${i}`}>
+          <a
+            href={link.href}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+            class="block py-2 font-display text-5xl tracking-tight aria-[current=page]:text-accent"
+          >
+            {link.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <ul class="flex gap-6 text-sm text-muted">
+    {
+      socials.map((s) => (
+        <li>
+          <a href={s.href} target="_blank" rel="noopener noreferrer" class="hover:text-ink">
+            {s.label} ↗
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .menu-item {
+    animation: menu-in 0.6s var(--ease-out-expo) both;
+    animation-delay: calc(var(--i) * 70ms + 50ms);
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+</style>
+
+<script>
+  // Hide the bar while scrolling down, bring it back on scroll up.
+  // Module scripts run once; the header element is re-queried because
+  // view transitions swap it out on navigation.
+  const SHOW_ABOVE = 80;
+  const THRESHOLD = 6;
+  let lastY = window.scrollY;
+  let ticking = false;
+
+  const getNav = () => document.querySelector<HTMLElement>('[data-nav]');
+
+  function update() {
+    ticking = false;
+    const nav = getNav();
+    if (!nav) return;
+    const y = window.scrollY;
+
+    nav.toggleAttribute('data-scrolled', y > 8);
+
+    if (nav.hasAttribute('data-menu-open') || y < SHOW_ABOVE) {
+      nav.removeAttribute('data-hidden');
+    } else if (y > lastY + THRESHOLD) {
+      nav.setAttribute('data-hidden', '');
+    } else if (y < lastY - THRESHOLD) {
+      nav.removeAttribute('data-hidden');
+    }
+    lastY = y;
+  }
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    },
+    { passive: true },
+  );
+
+  function setMenu(open: boolean) {
+    const nav = getNav();
+    const menu = document.querySelector<HTMLElement>('[data-mobile-menu]');
+    const toggle = nav?.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+    if (!nav || !menu || !toggle) return;
+    nav.toggleAttribute('data-menu-open', open);
+    menu.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    lastY = window.scrollY;
+    update();
+    setMenu(false);
+    getNav()
+      ?.querySelector('[data-menu-toggle]')
+      ?.addEventListener('click', () => setMenu(!getNav()?.hasAttribute('data-menu-open')));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && getNav()?.hasAttribute('data-menu-open')) setMenu(false);
+  });
+
+  // Close an open menu if the viewport grows past the mobile breakpoint.
+  window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
+    if (e.matches) setMenu(false);
+  });
+</script>

@@ -1,0 +1,38 @@
+---
+import { site, socials } from '../data/site';
+
+interface Props {
+  class?: string;
+  /** Include the email address alongside the social profiles. */
+  withEmail?: boolean;
+}
+
+const { class: className, withEmail = false } = Astro.props;
+const links = [
+  ...(withEmail ? [{ label: 'Email', href: `mailto:${site.email}`, external: false }] : []),
+  ...socials.map((s) => ({ ...s, external: true })),
+];
+---
+
+<ul class:list={['flex flex-wrap gap-x-8 gap-y-3', className]}>
+  {
+    links.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          class="group inline-flex items-center gap-1 font-medium transition-colors hover:text-accent"
+        >
+          {link.label}
+          <span
+            aria-hidden="true"
+            class="inline-block transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+          >
+            ↗
+          </span>
+          {link.external && <span class="sr-only">(opens in a new tab)</span>}
+        </a>
+      </li>
+    ))
+  }
+</ul>
