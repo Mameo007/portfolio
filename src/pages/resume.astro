@@ -1,0 +1,97 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import { education, experience, skills } from '../data/resume';
+
+// Only offer the download once a PDF has been added to /public.
+const hasPdf = existsSync(join(process.cwd(), 'public', site.resumePdf));
+---
+
+<BaseLayout title="Resume" description={`Resume of ${site.name}, ${site.role}.`}>
+  <section class="container-x pt-36 md:pt-48">
+    <p class="reveal text-sm font-medium uppercase tracking-[0.2em] text-muted">Resume</p>
+    <div class="mt-6 flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
+      <h1 class="reveal font-display text-[clamp(3rem,10vw,7.5rem)] leading-[0.95] tracking-[-0.03em]">
+        Experience<span class="text-accent">.</span>
+      </h1>
+      {
+        hasPdf && (
+          <a
+            href={site.resumePdf}
+            download
+            class="reveal group inline-flex w-fit shrink-0 items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-accent-ink"
+          >
+            Download PDF
+            <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-y-0.5">↓</span>
+          </a>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="container-x mt-20 md:mt-28" aria-labelledby="experience-heading">
+    <h2 id="experience-heading" class="sr-only">Work experience</h2>
+    <ol class="border-t border-line">
+      {
+        experience.map((job) => (
+          <li class="reveal grid gap-4 border-b border-line py-10 md:grid-cols-12 md:gap-8 md:py-14">
+            <p class="text-sm tabular-nums text-muted md:col-span-3 md:pt-2">{job.period}</p>
+            <div class="md:col-span-9">
+              <h3 class="font-display text-3xl tracking-tight md:text-4xl">{job.title}</h3>
+              <p class="mt-1 text-lg text-accent">{job.company}</p>
+              <ul class="mt-6 flex flex-col gap-3">
+                {job.points.map((point) => (
+                  <li class="flex gap-3 leading-relaxed text-muted">
+                    <span aria-hidden="true" class="mt-1 text-xs text-accent">
+                      ✦
+                    </span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="container-x mt-24 grid gap-16 md:mt-32 md:grid-cols-12 md:gap-8">
+    <div class="reveal md:col-span-3">
+      <h2 class="text-sm font-medium uppercase tracking-[0.2em] text-muted">Education</h2>
+    </div>
+    <ul class="reveal flex flex-col gap-8 md:col-span-9">
+      {
+        education.map((edu) => (
+          <li class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+            <div>
+              <p class="font-display text-2xl tracking-tight">{edu.degree}</p>
+              <p class="text-muted">{edu.school}</p>
+            </div>
+            <p class="text-sm tabular-nums text-muted">{edu.period}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="reveal md:col-span-3">
+      <h2 class="text-sm font-medium uppercase tracking-[0.2em] text-muted">Skills</h2>
+    </div>
+    <dl class="reveal grid gap-8 sm:grid-cols-2 md:col-span-9">
+      {
+        skills.map((s) => (
+          <div>
+            <dt class="font-medium">{s.group}</dt>
+            <dd class="mt-3 flex flex-wrap gap-2">
+              {s.items.map((item) => (
+                <span class="rounded-full border border-line px-3 py-1 text-sm text-muted">{item}</span>
+              ))}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+</BaseLayout>
