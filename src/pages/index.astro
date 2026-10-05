@@ -1,11 +1,36 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { site } from '../data/site';
+import Hero from '../components/Hero.astro';
+
+// TODO: replace with your own stack.
+const stack = ['TypeScript', 'React', 'Node.js', 'Python', 'PostgreSQL', 'AWS'];
 ---
 
 <BaseLayout>
-  <section class="container-x py-32">
-    <h1 class="font-display text-6xl">{site.name}</h1>
-    <p class="mt-4 text-muted">{site.tagline}</p>
+  <Hero />
+
+  <section id="about" class="container-x grid gap-12 border-t border-line pt-20 md:grid-cols-12 md:pt-28">
+    <h2 class="reveal text-sm font-medium uppercase tracking-[0.2em] text-muted md:col-span-3">About</h2>
+
+    <div class="md:col-span-9">
+      <!-- TODO: write your own intro -->
+      <p class="reveal font-display text-3xl leading-snug tracking-tight md:text-5xl md:leading-[1.15]">
+        I'm a software engineer who cares about the details: clean architecture, fast interfaces, and code
+        that the next person can actually read.
+      </p>
+
+      <div class="reveal mt-12 grid gap-10 sm:grid-cols-2" style="--reveal-delay:120ms">
+        <p class="text-lg leading-relaxed text-muted">
+          I enjoy working across the stack, from designing APIs and data models to polishing the last pixel of a UI.
+          Outside of work I'm usually building side projects or learning something new.
+        </p>
+        <div>
+          <h3 class="text-sm font-medium text-muted">Tools I reach for</h3>
+          <ul class="mt-4 flex flex-wrap gap-2">
+            {stack.map((item) => <li class="rounded-full border border-line px-4 py-1.5 text-sm">{item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
   </section>
 </BaseLayout>

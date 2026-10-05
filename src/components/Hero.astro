@@ -1,0 +1,110 @@
+---
+import { site } from '../data/site';
+
+// Each line of the headline; words animate in one after another.
+const lines = [
+  { words: ['I', 'build'], indent: false },
+  { words: ['thoughtful'], indent: true },
+  { words: ['software.'], indent: false, star: true },
+];
+
+let wordIndex = 0;
+---
+
+<section class="container-x flex min-h-[92svh] flex-col justify-end pb-16 pt-32 md:pb-24">
+  <p class="hero-fade mb-8 text-sm font-medium uppercase tracking-[0.2em] text-muted" style="--d:0ms">
+    {site.name} · {site.role}
+  </p>
+
+  <h1
+    class="font-display text-[clamp(3.25rem,13vw,9.5rem)] font-normal leading-[0.92] tracking-[-0.035em]"
+    aria-label={lines.map((l) => l.words.join(' ')).join(' ')}
+  >
+    {
+      lines.map((line) => (
+        <span class:list={['block', line.indent && 'pl-[12vw] italic text-accent']} aria-hidden="true">
+          {line.words.map((word) => (
+            <span class="inline-block overflow-hidden pb-[0.08em] align-bottom">
+              <span class="hero-word inline-block" style={`--d:${150 + wordIndex++ * 110}ms`}>
+                {word}
+              </span>
+            </span>
+          ))}
+          {line.star && (
+            <span
+              class="hero-fade star ml-[0.15em] inline-block align-top text-[0.45em] text-accent"
+              style={`--d:${200 + wordIndex * 110}ms`}
+            >
+              ✦
+            </span>
+          )}{' '}
+        </span>
+      ))
+    }
+  </h1>
+
+  <div class="mt-12 flex flex-col gap-8 md:mt-16 md:flex-row md:items-end md:justify-between">
+    <p class="hero-fade max-w-md text-lg leading-relaxed text-muted md:text-xl" style="--d:700ms">
+      {site.tagline} Currently open to new opportunities.
+    </p>
+
+    <div class="hero-fade flex flex-wrap gap-3" style="--d:820ms">
+      <a
+        href="/work"
+        class="group inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-accent-ink"
+      >
+        See my work
+        <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-1">→</span>
+      </a>
+      <a
+        href="/contact"
+        class="inline-flex items-center rounded-full border border-line px-6 py-3 text-sm font-medium transition-colors hover:border-ink"
+      >
+        Get in touch
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-word {
+    animation: word-up 1.1s var(--ease-out-expo) both;
+    animation-delay: var(--d);
+  }
+
+  .hero-fade {
+    animation: fade-in 1.2s var(--ease-out-expo) both;
+    animation-delay: var(--d);
+  }
+
+  .star {
+    animation:
+      fade-in 1.2s var(--ease-out-expo) both var(--d),
+      spin 18s linear infinite;
+  }
+
+  @keyframes word-up {
+    from {
+      transform: translateY(110%);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @keyframes spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .star {
+      animation: none;
+    }
+  }
+</style>
