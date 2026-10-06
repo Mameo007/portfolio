@@ -3,11 +3,14 @@ import { navLinks, site, socials } from '../data/site';
 
 const path = Astro.url.pathname;
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+// Logo letters past each initial collapse once the page is scrolled.
+const collapse =
+  'inline-block max-w-[4em] overflow-hidden transition-[max-width,opacity] duration-500 ease-out-expo group-data-[scrolled]:max-w-0 group-data-[scrolled]:opacity-0';
 ---
 
 <header
   data-nav
-  class="group fixed inset-x-0 top-0 z-50 border-b border-transparent transition-[translate,background-color,border-color] duration-500 ease-out-expo data-[hidden]:-translate-y-full data-[scrolled]:border-line data-[scrolled]:bg-bg/80 data-[scrolled]:backdrop-blur-md"
+  class="group fixed inset-x-0 top-0 z-50 border-b border-transparent transition-[background-color,border-color] duration-500 ease-out-expo data-[scrolled]:border-line data-[scrolled]:bg-bg/80 data-[scrolled]:backdrop-blur-md"
 >
   <a
     href="#main"
@@ -18,7 +21,18 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 
   <nav class="container-x flex h-16 items-center justify-between md:h-20" aria-label="Main">
     <a href="/" class="group/logo flex items-center gap-2 font-display text-lg font-semibold tracking-tight md:text-xl">
-      <span>{site.name}</span>
+      <span class="sr-only">{site.name}</span>
+      <span aria-hidden="true" class="flex whitespace-pre">
+        {
+          site.name.split(' ').map((word, i) => (
+            <>
+              {i > 0 && <span class={collapse}> </span>}
+              <span>{word[0]}</span>
+              <span class={collapse}>{word.slice(1)}</span>
+            </>
+          ))
+        }
+      </span>
       <span
         aria-hidden="true"
         class="text-accent transition-transform duration-700 ease-out-expo group-hover/logo:rotate-90">✦</span
@@ -113,32 +127,16 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 </style>
 
 <script>
-  // Hide the bar while scrolling down, bring it back on scroll up.
+  // Mark the bar once the page is scrolled (background, collapsed logo).
   // Module scripts run once; the header element is re-queried because
   // view transitions swap it out on navigation.
-  const SHOW_ABOVE = 80;
-  const THRESHOLD = 6;
-  let lastY = window.scrollY;
   let ticking = false;
 
   const getNav = () => document.querySelector<HTMLElement>('[data-nav]');
 
   function update() {
     ticking = false;
-    const nav = getNav();
-    if (!nav) return;
-    const y = window.scrollY;
-
-    nav.toggleAttribute('data-scrolled', y > 8);
-
-    if (nav.hasAttribute('data-menu-open') || y < SHOW_ABOVE) {
-      nav.removeAttribute('data-hidden');
-    } else if (y > lastY + THRESHOLD) {
-      nav.setAttribute('data-hidden', '');
-    } else if (y < lastY - THRESHOLD) {
-      nav.removeAttribute('data-hidden');
-    }
-    lastY = y;
+    getNav()?.toggleAttribute('data-scrolled', window.scrollY > 8);
   }
 
   window.addEventListener(
@@ -165,7 +163,6 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
   }
 
   document.addEventListener('astro:page-load', () => {
-    lastY = window.scrollY;
     update();
     setMenu(false);
     getNav()
