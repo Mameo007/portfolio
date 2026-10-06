@@ -1,0 +1,33 @@
+---
+title: ASL Alphabet Detector
+summary: A convolutional neural network written from scratch, with no ML framework, trained on an NVIDIA A100 to read sign language letters from a webcam.
+year: 2026
+role: GPU implementation (team of 2)
+stack: [Python, NumPy, CuPy, CUDA, SLURM, Flask]
+links:
+  repo: https://github.com/Mameo007/gpu-class-group-project
+featured: true
+order: 2
+---
+
+## The problem
+
+Classify 28 American Sign Language hand signs (A–Z plus *space* and *delete*) from 300×300 photos, many of which look nearly identical. The catch: no PyTorch or TensorFlow. Every layer, the loss and backpropagation had to be written by hand, and then made fast enough to train on a real dataset.
+
+## My approach
+
+My teammate and I built our own layer classes (convolution, dense, reshape, activations) that snap together like a framework's, first in NumPy as a CPU baseline. I led the GPU version, which runs the same network on CuPy on an A100 in the NCSA Delta cluster.
+
+- **Vectorized convolution.** Our first convolution looped over every window in Python. Switching to `sliding_window_view` plus `tensordot` computed all windows at once, made the CPU version about 19× faster, and mapped straight onto cuBLAS on the GPU.
+- **Keep data on the GPU.** The dataset is split on the CPU, moved to VRAM in one bulk transfer, and the host copies are freed. Loss and accuracy are accumulated on the device, so the training loop never waits on a GPU-to-CPU copy per batch.
+- **Fused softmax and cross-entropy.** Paired together, their gradient simplifies to *predicted − true*, one cheap operation instead of a full Jacobian.
+- **A live demo.** A Flask app streams the webcam, counts down, captures a frame and predicts the letter, building up words as you sign.
+
+## Results
+
+- **30.8× faster** training per image on the GPU than the CPU baseline (3.3 ms vs 102 ms at 300×300).
+- **95.8% test accuracy** on 6,300 held-out images, after 50 epochs on 1,500 images per class.
+
+## What I learned
+
+For a long time the model barely learned, and we assumed we just needed more data or epochs. The real culprit was the learning rate: at 0.1 the weights oscillated, and dropping to 0.001 fixed it. I also learned how much of GPU performance is about *not* moving data, not just raw compute.
