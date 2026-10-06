@@ -1,5 +1,6 @@
 ---
 import { site, socials } from '../data/site';
+import SocialIcon from './SocialIcon.astro';
 
 interface Props {
   class?: string;
@@ -8,29 +9,39 @@ interface Props {
 }
 
 const { class: className, withEmail = false } = Astro.props;
-const links = [
-  ...(withEmail ? [{ label: 'Email', href: `mailto:${site.email}`, external: false }] : []),
-  ...socials.map((s) => ({ ...s, external: true })),
-];
 ---
 
-<ul class:list={['flex flex-wrap gap-x-8 gap-y-3', className]}>
+<ul class:list={['flex flex-wrap items-center gap-x-8 gap-y-3', className]}>
   {
-    links.map((link) => (
+    withEmail && (
       <li>
         <a
-          href={link.href}
-          {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          href={`mailto:${site.email}`}
           class="group inline-flex items-center gap-1 font-medium transition-colors hover:text-accent"
         >
-          {link.label}
+          Email
           <span
             aria-hidden="true"
             class="inline-block transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
           >
             ↗
           </span>
-          {link.external && <span class="sr-only">(opens in a new tab)</span>}
+        </a>
+      </li>
+    )
+  }
+  {
+    socials.map((s) => (
+      <li>
+        <a
+          href={s.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={s.label}
+          class="-m-2 inline-flex p-2 transition-[color,translate] duration-300 hover:-translate-y-0.5 hover:text-accent"
+        >
+          <SocialIcon name={s.label} class="size-6" />
+          <span class="sr-only">{s.label} (opens in a new tab)</span>
         </a>
       </li>
     ))

@@ -1,5 +1,6 @@
 ---
 import { navLinks, site, socials } from '../data/site';
+import SocialIcon from './SocialIcon.astro';
 
 const path = Astro.url.pathname;
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
@@ -103,8 +104,9 @@ const collapse =
     {
       socials.map((s) => (
         <li>
-          <a href={s.href} target="_blank" rel="noopener noreferrer" class="hover:text-ink">
-            {s.label} ↗
+          <a href={s.href} target="_blank" rel="noopener noreferrer" class="-m-2 inline-flex p-2 hover:text-ink">
+            <SocialIcon name={s.label} class="size-6" />
+            <span class="sr-only">{s.label} (opens in a new tab)</span>
           </a>
         </li>
       ))
