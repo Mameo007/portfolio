@@ -1,0 +1,33 @@
+---
+title: Basketball League Database
+summary: A relational database for a basketball league, from ER diagram to MySQL schema, with a Python app for querying and updating it.
+year: 2025
+role: Solo, course project
+stack: [MySQL, SQL, Python]
+links:
+  repo: https://github.com/Mameo007/Database-Final-Project
+featured: true
+order: 3
+---
+
+## The problem
+
+Model a professional basketball league well enough that real questions (who is on this roster, what was the schedule that season, which team is heaviest) are a single query away, and the data can't drift into an inconsistent state when players are signed or cut.
+
+## My approach
+
+I started from an ER diagram, justified every entity and relationship, and then translated it into a MySQL schema of eight tables: Teams, Players, Games, Player_Stats, Seasons, Positions, Arenas and Coaches.
+
+- **Deliberate foreign keys.** Each relationship gets the delete behavior that matches the real world: deleting a team cascades to its games and coaching staff, is blocked while it still has players, and deleting an arena just clears the team's arena.
+- **A composite key for stats.** Player_Stats is keyed on *(player, game)*, so a player can't have two stat lines for the same game.
+- **A Python front end.** A menu-driven app on `mysql-connector` runs joins, a subquery and aggregates, signs and cuts players, and deliberately triggers constraint violations to show the schema protecting itself.
+- **Safe input.** Every user value goes through a parameterized query, and inputs are validated before they reach the database.
+
+## Results
+
+- Eight normalized tables populated with 400+ rows of realistic, semi-fictional league data.
+- Constraint tests confirm the database rejects updates and deletes that would orphan related rows.
+
+## What I learned
+
+Connecting application code to a live database was new to me: managing the connection, building dynamic queries and handling errors gracefully. Writing a rationale for every relationship up front also made the schema much easier to build, because the hard decisions were already made.

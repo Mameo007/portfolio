@@ -1,0 +1,35 @@
+---
+title: Move-In Cart Checkout
+summary: A full-stack app that replaces the paper sign-out sheet for move-in carts, with live availability, due times and an admin dashboard.
+year: 2026
+role: Solo developer
+stack: [Python, FastAPI, SQLAlchemy, PostgreSQL, React, GitHub Actions]
+links:
+  repo: https://github.com/Mameo007/movein-cart-api
+  live: https://movein-cart-management.vercel.app
+featured: true
+order: 1
+---
+
+## The problem
+
+On move-in day, residents borrow carts from the front desk to haul their things upstairs. Tracking who has which cart on paper means nobody can see at a glance which carts are free, when one is overdue, or who to call when one is left in a hallway.
+
+## My approach
+
+I built a FastAPI backend on Postgres (Neon) and a React frontend on Vercel. The resident-facing side only does three things: list carts, check one out with a name, phone number, room and due time, and return it. Everything else lives behind an admin page.
+
+- **Explicit cart states.** A cart is `AVAILABLE`, `IN_USE` or `MAINTENANCE`, and the API refuses transitions that don't make sense: checking out a cart that's in use, returning one that isn't, or deleting one that's currently checked out.
+- **One way to end a session.** The normal return and the admin's force-return (for an abandoned cart) share a single `close_session` helper, so both paths leave the data in the same state.
+- **Timezones done properly.** Every timestamp is stored as UTC. The admin picks the site's timezone, and it's applied only when a time is typed in or shown, so changing it changes how due times display, not when carts are actually due.
+- **Simple, safe admin auth.** A shared password is exchanged for a signed JWT that expires after eight hours. The password check uses a constant-time comparison so it can't be guessed by timing.
+
+## Results
+
+- 38 pytest tests cover checkout and return rules, admin auth, session history, cart lifecycle and timezone handling.
+- GitHub Actions runs the suite on every push to `main` and deploys the API to Render only when it passes.
+- Work landed through feature branches and pull requests, and the app is live.
+
+## What I learned
+
+Time is harder than it looks. A due time typed into a form is a wall-clock time in some zone, while the server and database each have their own idea of "now". Storing one canonical form (naive UTC) and converting only at the edges made the bugs go away, and the tests pin that behavior down so it stays fixed.
