@@ -23,12 +23,17 @@ let wordIndex = 0;
     {
       lines.map((line) => (
         <span class:list={['block', line.indent && 'pl-[12vw] italic text-accent']} aria-hidden="true">
-          {line.words.map((word) => (
-            <span class="inline-block overflow-hidden pb-[0.08em] align-bottom">
-              <span class="hero-word inline-block" style={`--d:${150 + wordIndex++ * 110}ms`}>
-                {word}
+          {line.words.map((word, i) => (
+            <>
+              {i > 0 && ' '}
+              {/* The mask is padded right/bottom so italic overhangs and descenders
+                  aren't clipped; negative margins keep the layout unchanged. */}
+              <span class="-mb-[0.12em] -mr-[0.12em] inline-block overflow-hidden pb-[0.2em] pr-[0.12em] align-bottom">
+                <span class="hero-word inline-block" style={`--d:${150 + wordIndex++ * 110}ms`}>
+                  {word}
+                </span>
               </span>
-            </span>
+            </>
           ))}
           {line.star && (
             <span
@@ -85,7 +90,8 @@ let wordIndex = 0;
 
   @keyframes word-up {
     from {
-      transform: translateY(110%);
+      /* Far enough to start fully below the padded mask, ascenders included. */
+      transform: translateY(150%);
     }
   }
 
