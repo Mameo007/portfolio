@@ -34,7 +34,7 @@ const { class: className, withEmail = false } = Astro.props;
           target="_blank"
           rel="noopener noreferrer"
           title={s.label}
-          class="-m-2 inline-flex p-2 transition-[color,translate] duration-300 hover:-translate-y-0.5 hover:text-accent"
+          class="-m-2 inline-flex p-2 transition-[translate] duration-300 hover:-translate-y-0.5"
         >
           <SocialIcon name={s.label} class="size-6" />
           <span class="sr-only">{s.label} (opens in a new tab)</span>
